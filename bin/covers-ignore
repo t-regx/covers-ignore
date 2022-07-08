@@ -2,14 +2,45 @@
 <?php
 
 if ($argc !== 2) {
-    print "Usage: covers-ignore /path/to/test" . PHP_EOL;
+    print "Usage: covers-ignore [file|directory/]" . PHP_EOL;
     return 1;
 };
+
+function x(string $relative, string $path): string
+{
+    if (\strPos($path, $relative) === 0) {
+        return '.' . \subStr($path, \strLen($relative));
+    }
+    throw new Exception("Failed to return relative path");
+}
+
+$updated = 0;
+$checked = 0;
 
 if (isset($_composer_autoload_path)) {
     if (\file_exists($_composer_autoload_path)) {
         require $_composer_autoload_path;
-        echo \TRegx\Ignore\ignoredCovers(file_get_contents($argv[1]));
+
+        $workingDirectory = getCwd();
+        $sourceDirectory = $workingDirectory . DIRECTORY_SEPARATOR . $argv[1];
+
+        $iterator = new RegexIterator(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceDirectory)), '/^.+\.php$/i', RegexIterator::GET_MATCH);
+
+        foreach ($iterator as [$filename]) {
+            $content = file_get_contents($filename);
+            $checked++;
+            $relativePath = x($workingDirectory, $filename);
+            if (str_contains($content, '@covers')) {
+                $updated++;
+                file_put_contents($filename, \TRegx\Ignore\ignoredCovers($content));
+                echo "File cleaned $relativePath" . PHP_EOL;
+            }
+        }
+
+        $clean = $checked - $updated;
+        echo "Checked: $checked files. Updated $updated files. $clean files were already clean" . PHP_EOL;
+
+        return;
     }
 }
 
