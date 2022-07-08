@@ -2,8 +2,8 @@
 namespace Test\CoversIgnore;
 
 use PHPUnit\Framework\TestCase;
+use TRegx\CoversIgnore\TestFile;
 use function Test\resource\resource;
-use function TRegx\Ignore\ignoredCovers;
 
 class Test extends TestCase
 {
@@ -14,10 +14,9 @@ class Test extends TestCase
     {
         // given
         $input = \file_get_contents(resource("php/identity.txt"));
-        // when
-        $output = ignoredCovers($input);
-        // then
-        $this->assertSame($input, $output);
+        $case = new TestFile($input);
+        // when, then
+        $this->assertSame($input, $case->coversIgnored());
     }
 
     /**
@@ -30,9 +29,9 @@ class Test extends TestCase
         $input = \file_get_contents(resource($input));
         $expected = \file_get_contents(resource($expected));
         // when
-        $output = ignoredCovers($input);
+        $file = new TestFile($input);
         // then
-        $this->assertSame($expected, $output);
+        $this->assertSame($expected, $file->coversIgnored());
     }
 
     public function inputs(): array

@@ -10,9 +10,9 @@
     "bin/covers-ignore"
   ],
   "autoload": {
-    "files": [
-      "src/CoversIgnore/ignore.php"
-    ]
+    "psr-4": {
+      "TRegx\\CoversIgnore\\": "src/CoversIgnore/"
+    }
   },
   "autoload-dev": {
     "classmap": [
