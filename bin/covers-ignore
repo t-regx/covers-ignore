@@ -6,4 +6,7 @@ if ($argc !== 2) {
     return 1;
 }
 
+$autoload = \getEnv('COMPOSER_RUNTIME_BIN_DIR');
+require $autoload;
+
 echo \TRegx\Ignore\ignoredCovers(file_get_contents($argv[1]));
