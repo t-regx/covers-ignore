@@ -4,6 +4,13 @@
 if ($argc !== 2) {
     print "Usage: covers-ignore /path/to/test" . PHP_EOL;
     return 1;
+};
+
+if (isset($_composer_autoload_path)) {
+    if (\file_exists($_composer_autoload_path)) {
+        require $_composer_autoload_path;
+        echo \TRegx\Ignore\ignoredCovers(file_get_contents($argv[1]));
+    }
 }
 
-echo \TRegx\Ignore\ignoredCovers(file_get_contents($argv[1]));
+throw new Exception("Failed to read \$_composer_autoload_path");
