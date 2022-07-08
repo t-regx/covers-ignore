@@ -15,43 +15,15 @@ function composerAutoloadPath(): string
     if (isset($_composer_autoload_path)) {
         return $_composer_autoload_path;
     }
-    return \join(DIRECTORY_SEPARATOR, [dirName(__file__), '..', 'vendor', 'autoload.php']);
+    return \join(DIRECTORY_SEPARATOR, [\dirName(__file__), '..', 'vendor', 'autoload.php']);
 }
-
-function relativePath(string $relative, string $path): string
-{
-    if (\strPos($path, $relative) === 0) {
-        return '.' . \subStr($path, \strLen($relative));
-    }
-    throw new \Exception("Failed to return relative path");
-}
-
-if ($argc !== 2) {
-    print "Usage: covers-ignore [file|directory/]" . PHP_EOL;
-    return 1;
-}
-
-$updated = 0;
-$checked = 0;
 
 require \autoloadPath();
 
-$workingDirectory = \getCwd();
-$sourceDirectory = $workingDirectory . DIRECTORY_SEPARATOR . $argv[1];
-
-$iterator = new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceDirectory)), '/^.+\.php$/i', \RegexIterator::GET_MATCH);
-
-foreach ($iterator as [$filename]) {
-    $content = \file_get_contents($filename);
-    $checked++;
-    $relativePath = \relativePath($workingDirectory, $filename);
-    $testFile = new \TRegx\CoversIgnore\TestFile($content);
-    if ($testFile->dirty()) {
-        $updated++;
-        \file_put_contents($filename, $testFile->coversIgnored());
-        echo "File cleaned $relativePath" . PHP_EOL;
-    }
+$application = new \TRegx\CoversIgnore\Application(\getCwd());
+try {
+    $application->run($argv);
+} catch (Exception $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+    return 1;
 }
-
-$clean = $checked - $updated;
-echo "Checked: $checked files. Updated $updated files. $clean files were already clean." . PHP_EOL;
