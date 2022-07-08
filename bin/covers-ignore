@@ -4,6 +4,7 @@
 if ($argc !== 2) {
     print "Usage: covers-ignore /path/to/test" . PHP_EOL;
     return 1;
-}
+};
 
+require __DIR__ . '/../vendor/autoload.php';
 echo \TRegx\Ignore\ignoredCovers(file_get_contents($argv[1]));
