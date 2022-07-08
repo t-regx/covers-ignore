@@ -1,12 +1,24 @@
 #!/usr/bin/env php
 <?php
 
-if ($argc !== 2) {
-    print "Usage: covers-ignore [file|directory/]" . PHP_EOL;
-    return 1;
-};
+function autoloadPath(): string
+{
+    $path = composerAutoloadPath();
+    if (\file_exists($path)) {
+        return $path;
+    }
+    throw new \Exception("Failed to read \$_composer_autoload_path");
+}
 
-function x(string $relative, string $path): string
+function composerAutoloadPath(): string
+{
+    if (isset($_composer_autoload_path)) {
+        return $_composer_autoload_path;
+    }
+    return \join(DIRECTORY_SEPARATOR, [dirName(__file__), '..', 'vendor', 'autoload.php']);
+}
+
+function relativePath(string $relative, string $path): string
 {
     if (\strPos($path, $relative) === 0) {
         return '.' . \subStr($path, \strLen($relative));
@@ -14,35 +26,32 @@ function x(string $relative, string $path): string
     throw new \Exception("Failed to return relative path");
 }
 
+if ($argc !== 2) {
+    print "Usage: covers-ignore [file|directory/]" . PHP_EOL;
+    return 1;
+}
+
 $updated = 0;
 $checked = 0;
 
-if (isset($_composer_autoload_path)) {
-    if (\file_exists($_composer_autoload_path)) {
-        require $_composer_autoload_path;
+require \autoloadPath();
 
-        $workingDirectory = \getCwd();
-        $sourceDirectory = $workingDirectory . DIRECTORY_SEPARATOR . $argv[1];
+$workingDirectory = \getCwd();
+$sourceDirectory = $workingDirectory . DIRECTORY_SEPARATOR . $argv[1];
 
-        $iterator = new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceDirectory)), '/^.+\.php$/i', \RegexIterator::GET_MATCH);
+$iterator = new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceDirectory)), '/^.+\.php$/i', \RegexIterator::GET_MATCH);
 
-        foreach ($iterator as [$filename]) {
-            $content = \file_get_contents($filename);
-            $checked++;
-            $relativePath = x($workingDirectory, $filename);
-            if (str_contains($content, '@covers')) {
-                $testFile = new \TRegx\CoversIgnore\TestFile($content);
-                $updated++;
-                \file_put_contents($filename, $testFile->coversIgnored());
-                echo "File cleaned $relativePath" . PHP_EOL;
-            }
-        }
-
-        $clean = $checked - $updated;
-        echo "Checked: $checked files. Updated $updated files. $clean files were already clean" . PHP_EOL;
-
-        return;
+foreach ($iterator as [$filename]) {
+    $content = \file_get_contents($filename);
+    $checked++;
+    $relativePath = \relativePath($workingDirectory, $filename);
+    $testFile = new \TRegx\CoversIgnore\TestFile($content);
+    if ($testFile->dirty()) {
+        $updated++;
+        \file_put_contents($filename, $testFile->coversIgnored());
+        echo "File cleaned $relativePath" . PHP_EOL;
     }
 }
 
-throw new \Exception("Failed to read \$_composer_autoload_path");
+$clean = $checked - $updated;
+echo "Checked: $checked files. Updated $updated files. $clean files were already clean." . PHP_EOL;
