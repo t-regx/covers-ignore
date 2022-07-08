@@ -7,7 +7,7 @@ function autoloadPath(): string
     if (\file_exists($path)) {
         return $path;
     }
-    throw new \Exception("Failed to read \$_composer_autoload_path");
+    throw new \Exception("Failed to read autoload '$path'");
 }
 
 function composerAutoloadPath(): string
