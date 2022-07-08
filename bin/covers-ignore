@@ -11,7 +11,7 @@ function x(string $relative, string $path): string
     if (\strPos($path, $relative) === 0) {
         return '.' . \subStr($path, \strLen($relative));
     }
-    throw new Exception("Failed to return relative path");
+    throw new \Exception("Failed to return relative path");
 }
 
 $updated = 0;
@@ -21,18 +21,19 @@ if (isset($_composer_autoload_path)) {
     if (\file_exists($_composer_autoload_path)) {
         require $_composer_autoload_path;
 
-        $workingDirectory = getCwd();
+        $workingDirectory = \getCwd();
         $sourceDirectory = $workingDirectory . DIRECTORY_SEPARATOR . $argv[1];
 
-        $iterator = new RegexIterator(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceDirectory)), '/^.+\.php$/i', RegexIterator::GET_MATCH);
+        $iterator = new \RegexIterator(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($sourceDirectory)), '/^.+\.php$/i', \RegexIterator::GET_MATCH);
 
         foreach ($iterator as [$filename]) {
-            $content = file_get_contents($filename);
+            $content = \file_get_contents($filename);
             $checked++;
             $relativePath = x($workingDirectory, $filename);
             if (str_contains($content, '@covers')) {
+                $testFile = new \TRegx\CoversIgnore\TestFile($content);
                 $updated++;
-                file_put_contents($filename, \TRegx\Ignore\ignoredCovers($content));
+                \file_put_contents($filename, $testFile->coversIgnored());
                 echo "File cleaned $relativePath" . PHP_EOL;
             }
         }
@@ -44,4 +45,4 @@ if (isset($_composer_autoload_path)) {
     }
 }
 
-throw new Exception("Failed to read \$_composer_autoload_path");
+throw new \Exception("Failed to read \$_composer_autoload_path");
