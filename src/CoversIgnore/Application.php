@@ -3,6 +3,7 @@ namespace TRegx\CoversIgnore;
 
 use TRegx\CoversIgnore\Code\TestFile;
 use TRegx\CoversIgnore\FileSystem\Directory;
+use TRegx\CoversIgnore\FileSystem\File;
 
 class Application
 {
@@ -22,8 +23,31 @@ class Application
 
     private function runApp(Arguments $arguments): void
     {
+        $this->runInput(new InputFile($arguments, $this->directory));
+    }
+
+    private function runInput(InputFile $input): void
+    {
+        if ($input->isDirectory()) {
+            $this->runDirectory($input);
+        } else {
+            $this->runFile($input);
+        }
+    }
+
+    private function runFile(InputFile $x): void
+    {
+        $file = new File($x->source());
+        $testFile = new TestFile($file);
+        if ($testFile->hasCovers()) {
+            $file->write($testFile->coversIgnored());
+        }
+    }
+
+    private function runDirectory(InputFile $inputFile): void
+    {
         $stats = new Statistic();
-        foreach (new Directory($this->source($arguments)) as $file) {
+        foreach (new Directory($inputFile->source()) as $file) {
             $stats->nextFile();
             $testFile = new TestFile($file);
             if ($testFile->hasCovers()) {
@@ -33,10 +57,5 @@ class Application
             }
         }
         $this->console->summary($stats);
-    }
-
-    private function source(Arguments $arguments): string
-    {
-        return $this->directory . DIRECTORY_SEPARATOR . $arguments->filename();
     }
 }

@@ -19,7 +19,7 @@ class ApplicationTest extends TestCase
     /**
      * @test
      */
-    public function test(): void
+    public function testDirectory(): void
     {
         // given
         $this->fileSystem->copy(resource_path('root'));
@@ -34,6 +34,32 @@ class ApplicationTest extends TestCase
                 'directory' => [
                     'child'      => [
                         'covers.x2.php' => resource('php/covers.x2/covers.x2.expected.txt'),
+                    ],
+                    'covers.php' => resource('php/covers/covers.expected.txt')
+                ]
+            ],
+        ];
+        $this->assertEquals($expected, $this->fileSystem->structure());
+    }
+
+    /**
+     * @test
+     */
+    public function testFile(): void
+    {
+        // given
+        $this->fileSystem->copy(resource_path('root'));
+
+        // when
+        $app = new Application($this->fileSystem->url());
+        $app->run(['', 'directory/covers.php']);
+
+        // then
+        $expected = [
+            'root' => [
+                'directory' => [
+                    'child'      => [
+                        'covers.x2.php' => resource('php/covers.x2/covers.x2.txt'),
                     ],
                     'covers.php' => resource('php/covers/covers.expected.txt')
                 ]
