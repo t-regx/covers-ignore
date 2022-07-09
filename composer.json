@@ -7,7 +7,7 @@
     "test": "phpunit --no-coverage"
   },
   "bin": [
-    "bin/covers-ignore"
+    "bin/covers-ignore.php"
   ],
   "autoload": {
     "psr-4": {
