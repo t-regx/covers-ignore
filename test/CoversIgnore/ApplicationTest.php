@@ -4,8 +4,8 @@ namespace Test\CoversIgnore;
 use PHPUnit\Framework\TestCase;
 use Test\ArchitectureDependant;
 use Test\Resources;
+use Test\StateConsole;
 use TRegx\CoversIgnore\Application;
-use function Test\output\output;
 use function Test\resource\resource;
 
 class ApplicationTest extends TestCase
@@ -28,7 +28,7 @@ class ApplicationTest extends TestCase
         $this->resources->use('root');
 
         // when
-        $app = new Application($this->resources->url());
+        $app = new Application($this->resources->url(), new StateConsole());
         $app->run(['', 'directory/covers.php']);
 
         // then
@@ -51,9 +51,9 @@ class ApplicationTest extends TestCase
     {
         // given
         $this->resources->use('root');
-        $app = new Application($this->resources->url());
+        $app = new Application($this->resources->url(), new StateConsole());
         // when
-        output(fn() => $app->run(['', 'directory']));
+        $app->run(['', 'directory']);
         // then
         $this->resources->assertStructure([
             'root' => [
@@ -75,16 +75,18 @@ class ApplicationTest extends TestCase
         $this->marTestUnnecessaryOnUnix();
         // given
         $this->resources->use('root');
-        $app = new Application($this->resources->url());
+        $console = new StateConsole();
+        $app = new Application($this->resources->url(), $console);
         // when
-        $output = output(fn() => $app->run(['', 'directory']));
+        $app->run(['', 'directory']);
         // then
-        $output->assertOutput([
-            'File cleaned .\directory\child\covers.x2.php',
-            'File cleaned .\directory\covers.php',
-            'Checked: 2 files. Updated 2 files. 0 files were already clean.',
-            ''
-        ]);
+        $this->assertEquals(2, $console->statistics()->updated);
+        $this->assertEquals(2, $console->statistics()->all);
+        $expected = [
+            '.\directory\child\covers.x2.php',
+            '.\directory\covers.php',
+        ];
+        $this->assertSame($expected, $console->filenamesInOrder());
     }
 
     /**
@@ -95,15 +97,17 @@ class ApplicationTest extends TestCase
         $this->markTestUnnecessaryOnWindows();
         // given
         $this->resources->use('root');
-        $app = new Application($this->resources->url());
+        $console = new StateConsole();
+        $app = new Application($this->resources->url(), $console);
         // when
-        $output = output(fn() => $app->run(['', 'directory']));
+        $app->run(['', 'directory']);
         // then
-        $output->assertOutput([
-            'File cleaned ./directory/child/covers.x2.php',
-            'File cleaned ./directory/covers.php',
-            'Checked: 2 files. Updated 2 files. 0 files were already clean.',
-            ''
-        ]);
+        $this->assertEquals(2, $console->statistics()->updated);
+        $this->assertEquals(2, $console->statistics()->all);
+        $expected = [
+            './directory/child/covers.x2.php',
+            './directory/covers.php',
+        ];
+        $this->assertSame($expected, $console->filenamesInOrder());
     }
 }

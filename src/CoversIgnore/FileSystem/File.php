@@ -22,6 +22,8 @@ class File
         if (\strPos($this->filename, $parent) === 0) {
             return '.' . \subStr($this->filename, \strLen($parent));
         }
-        throw new \Exception("Failed to return relative path");
+        // @codeCoverageIgnoreStart
+        throw new \Exception();
+        // @codeCoverageIgnoreEnd
     }
 }

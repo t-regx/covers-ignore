@@ -10,9 +10,9 @@ class Application
     private Console $console;
     private string $directory;
 
-    public function __construct(string $directory)
+    public function __construct(string $directory, Console $console)
     {
-        $this->console = new Console();
+        $this->console = $console;
         $this->directory = $directory;
     }
 

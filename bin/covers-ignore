@@ -20,7 +20,7 @@ function composerAutoloadPath(): string
 
 require \autoloadPath();
 
-$application = new \TRegx\CoversIgnore\Application(\getCwd());
+$application = new \TRegx\CoversIgnore\Application(\getCwd(), new \TRegx\CoversIgnore\Console());
 try {
     $application->run($argv);
 } catch (Exception $exception) {
