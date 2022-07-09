@@ -19,7 +19,8 @@
       "test/"
     ],
     "files": [
-      "test/resource/resource.php"
+      "test/resource/resource.php",
+      "test/output/output.php"
     ],
     "psr-4": {
       "Test\\": "test/"
