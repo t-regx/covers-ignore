@@ -14,6 +14,6 @@ class OutputString
 
     public function assertOutput(array $lines): void
     {
-        Assert::assertSame(\join(\PHP_EOL, $lines), $this->output);
+        Assert::assertSame(\json_encode(\join(\PHP_EOL, $lines)), \json_encode($this->output));
     }
 }
