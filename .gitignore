@@ -9,3 +9,6 @@ composer.phar
 
 # PhpUnit
 .phpunit.result.cache
+
+# Coverage
+coverage/

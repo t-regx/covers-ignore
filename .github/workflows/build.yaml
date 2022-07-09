@@ -41,7 +41,7 @@ jobs:
         run: composer install --no-progress
 
       - name: Run tests
-        run: ./vendor/bin/phpunit test
+        run: ./vendor/bin/phpunit test --coverage-clover=coverage/clover.xml
 
       - name: Install "php-coveralls"
         if: "${{ matrix.coverage != 'none' }}"
@@ -52,4 +52,4 @@ jobs:
         continue-on-error: true
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: git config --global --add safe.directory /__w/T-Regx/covers-ignore && ./vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v
+        run: git config --global --add safe.directory /__w/T-Regx/covers-ignore && ./vendor/bin/php-coveralls --coverage_clover=coverage/clover.xml --json_path=out.json
