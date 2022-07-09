@@ -2,6 +2,7 @@
 namespace Test\CoversIgnore;
 
 use PHPUnit\Framework\TestCase;
+use Test\ArchitectureDependant;
 use Test\Resources;
 use TRegx\CoversIgnore\Application;
 use function Test\output\output;
@@ -9,6 +10,8 @@ use function Test\resource\resource;
 
 class ApplicationTest extends TestCase
 {
+    use ArchitectureDependant;
+
     private Resources $resources;
 
     public function setUp(): void
@@ -44,22 +47,14 @@ class ApplicationTest extends TestCase
     /**
      * @test
      */
-    public function testDirectory(): void
+    public function testDirectoryCleans(): void
     {
         // given
         $this->resources->use('root');
         $app = new Application($this->resources->url());
-
         // when
-        $output = output(fn() => $app->run(['', 'directory']));
-
+        output(fn() => $app->run(['', 'directory']));
         // then
-        $output->assertOutput([
-            'File cleaned .\directory\child\covers.x2.php',
-            'File cleaned .\directory\covers.php',
-            'Checked: 2 files. Updated 2 files. 0 files were already clean.',
-            ''
-        ]);
         $this->resources->assertStructure([
             'root' => [
                 'directory' => [
@@ -69,6 +64,46 @@ class ApplicationTest extends TestCase
                     'covers.php' => resource('php/covers/covers.expected.txt')
                 ]
             ],
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function testDirectorySummaryWindows(): void
+    {
+        $this->marTestUnnecessaryOnUnix();
+        // given
+        $this->resources->use('root');
+        $app = new Application($this->resources->url());
+        // when
+        $output = output(fn() => $app->run(['', 'directory']));
+        // then
+        $output->assertOutput([
+            'File cleaned .\directory\child\covers.x2.php',
+            'File cleaned .\directory\covers.php',
+            'Checked: 2 files. Updated 2 files. 0 files were already clean.',
+            ''
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function testDirectorySummaryUnix(): void
+    {
+        $this->markTestUnnecessaryOnWindows();
+        // given
+        $this->resources->use('root');
+        $app = new Application($this->resources->url());
+        // when
+        $output = output(fn() => $app->run(['', 'directory']));
+        // then
+        $output->assertOutput([
+            'File cleaned ./directory/child/covers.x2.php',
+            'File cleaned ./directory/covers.php',
+            'Checked: 2 files. Updated 2 files. 0 files were already clean.',
+            ''
         ]);
     }
 }
