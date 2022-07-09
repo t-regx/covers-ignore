@@ -2,6 +2,7 @@
 namespace TRegx\CoversIgnore\FileSystem;
 
 use IteratorAggregate;
+use Traversable;
 
 class Directory implements IteratorAggregate
 {
@@ -10,9 +11,9 @@ class Directory implements IteratorAggregate
     }
 
     /**
-     * @return iterable<File>
+     * @return Traversable<File>|iterable<File>
      */
-    public function getIterator(): iterable
+    public function getIterator(): Traversable
     {
         foreach ($this->recursiveFiles() as [$filename]) {
             yield new File($filename);
