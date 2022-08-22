@@ -31,13 +31,17 @@ class Application
         if ($input->isDirectory()) {
             $this->runDirectory($input);
         } else {
-            $this->runFile($input);
+            $this->runInputFile($input);
         }
     }
 
-    private function runFile(InputFile $x): void
+    private function runInputFile(InputFile $inputFile): void
     {
-        $file = new File($x->source());
+        $this->runFile(new File($inputFile->source()));
+    }
+
+    private function runFile(File $file): void
+    {
         $testFile = new TestFile($file);
         if ($testFile->hasCovers()) {
             $file->write($testFile->coversIgnored());
